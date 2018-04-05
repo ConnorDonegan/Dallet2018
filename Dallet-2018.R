@@ -1,6 +1,18 @@
-pkgs <- c("readxl", "rvest", "tidyverse", "scales")
-lapply(pkgs, library, character.only = TRUE); rm(list=ls())
 
+
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# get county level election turns for Wisconsin in the 2016 Presidential race and WI Supreme Court election of 2018
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# load packages ====
+
+pkgs <- c("readxl", "rvest", "tidyverse", "scales", "gridExtra", "splines")
+lapply(pkgs, function(x) {
+  if(!require(x, character.only = TRUE)) install.packages(x)
+  library(x, character.only = TRUE)
+})
 
 # 2012 election results ====
 url <- "http://elections.wi.gov/sites/default/files/County%20by%20County_11.6.12.xls"
@@ -74,31 +86,26 @@ wi <- merge(pres12,pres16, by = "County") %>%
   mutate(dem_change = .01*dallet_pct - clinton_pct) %>%
   as.tibble()
 
-saveRDS(wi, "data/wisconsin/supreme-court-2018.rds")
+write_csv(wi, "data/wisconsin/wi-county-supreme-court-2018.csv")
 
 dem_growth1 <- ggplot(wi) +
   geom_point(aes(trump_pct, dem_change, 
                  col = wi$dem_change > 0,
                  size = Total_2016), 
-             shape = 1,
-             alpha = .85) +
-  geom_smooth(aes(trump_pct, dem_change, weight = Total_2016), 
-              span = 2,
-              se = F,
-              col = "darkblue",
-              alpha = .15) +
-  geom_smooth(aes(trump_pct, dem_change), 
-              span = 2,
-              se = F,
-              col = "lightblue",
-              alpha = .15) +
+             shape = 21,
+             alpha = .85) 
+dem_growth1 <- dem_growth1 +  
+  stat_smooth( # smooth using regression spline with cubic  polynomial 
+              aes(trump_pct, dem_change, weight = Total_2016),
+              method="lm", se=TRUE, fill=NA,
+              formula=y ~ splines::ns(x, 3),colour="darkblue") +
   scale_color_manual(values = c("firebrick", "darkblue")) +
   scale_x_continuous(breaks = seq(-1, 1, .1),
                      name = "Trump",
                      labels = percent) +
   scale_y_continuous(breaks = seq(-1, 1, .05),
                      labels = percent,
-                     # limits = c(0,.20),
+                     limits = c(-.15, .18),
                      name = "Dallet - Clinton") +
   theme_bw()  +
   theme(legend.position = "none") +
@@ -109,22 +116,21 @@ dem_growth2 <- ggplot(wi) +
                  col = wi$dem_change > 0,
                  size = Total_2016), 
              shape = 1,
-             alpha = .85) +
-  geom_smooth(aes(gop_change, dem_change, weight = Total_2016), 
-              col = "darkblue",
-              se = F,
-              alpha = .15) +
-  geom_smooth(aes(gop_change, dem_change), 
-              col = "lightblue",
-              se = F,
-              alpha = .15) +
+             alpha = .85) 
+
+dem_growth2 <- dem_growth2 + 
+  stat_smooth( # smooth using regression spline with cubic  polynomial 
+    aes(gop_change, dem_change, weight = Total_2016),
+    method="lm", se=TRUE, fill=NA,
+    formula=y ~ splines::ns(x, 3),colour="darkblue") +
   scale_color_manual(values = c("firebrick", "darkblue")) +
   scale_x_continuous(breaks = seq(-1, 1, .05),
                      name = "Trump - Romney",
                      labels = percent) +
   scale_y_continuous(breaks = seq(-1, 1, .05),
                      labels = percent,
-                     name = "Dallet - Clinton") +
+                     limits = c(-.15, .18),
+                     name = NULL) +
   theme_bw()  +
   theme(legend.position = "none") +
   geom_hline(yintercept = 0, colour = "black")

@@ -1,4 +1,11 @@
 
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# get precinct and county level election turns for Alabama in the 2016 Presidential race and the special Senate election of 2017
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# load packages ====
 pkgs <- c("readxl", "tidyverse", "data.table", "scales")
 lapply(pkgs, library, character.only = TRUE); rm(list=ls())
 
@@ -123,7 +130,7 @@ al.prec.senate <- data.table::rbindlist(al.prec.senate)
 al.county.senate <- data.table::rbindlist(al.county.senate)
 
 
-# merge and plot counties ====
+# merge and  ====
 
 # extract county names from file names
 al.county.senate$County <- str_remove(al.county.senate$County, "2017-General-")
@@ -139,10 +146,22 @@ ala.county  %>%
   ggplot() +
   geom_point(aes(trump_pct, change_dem, size = Total.x), alpha=.5, col="darkblue") +
   geom_smooth(aes(trump_pct, change_dem, weight = Total.x), col = "darkblue", alpha = .15) +
-  theme_bw() +
+  scale_color_manual(values = c("firebrick", "darkblue")) +
+  scale_x_continuous(breaks = seq(-.1, 1, .1),
+                     name = "Trump",
+                     labels = percent) +
+  scale_y_continuous(breaks = seq(-1, 1, .05),
+                     labels = percent,
+                     name = "Jones - Clinton") +
+  theme_bw()  +
   theme(legend.position = "none") +
-  geom_hline(yintercept = 0, colour = "black")
+  geom_hline(yintercept = 0, colour = "black") 
 
+ggsave("alabama-county-dem-swing-plot.jpg", 
+       width = 5.5,
+       height = 4.25)
+
+write_csv(ala.county, "data/alabama/county-results-20162017.csv")
 
 # merge and plot precincts ====
 
@@ -156,9 +175,8 @@ ala.prec <- merge(al.prec.pres, al.prec.senate, by = "Precinct") %>%
   as.tibble() %>%
   mutate(change_dem = jones_pct - clinton_pct) 
 
-alabama <- list(ala.county, ala.prec)
+write_csv(ala.prec, "data/alabama/precinct-results-20162017.csv")
 
-saveRDS(alabama, "data/alabama/counties-and-precincts.rds")
   
 ala.prec %>%
   ggplot() +
@@ -181,7 +199,7 @@ ala.prec %>%
   theme(legend.position = "none") +
   geom_hline(yintercept = 0, colour = "black") 
 
-ggsave("alabama-dem-swing-plot.jpg", 
+ggsave("alabama-precinct-dem-swing-plot.jpg", 
        width = 5.5,
        height = 4.25)
 
