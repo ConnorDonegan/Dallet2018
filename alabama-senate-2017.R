@@ -1,0 +1,189 @@
+
+pkgs <- c("readxl", "tidyverse", "data.table", "scales")
+lapply(pkgs, library, character.only = TRUE); rm(list=ls())
+
+# load alabama 2016 presidential election results ====
+tf <- tempfile(pattern = "president", tmpdir = tempdir(), fileext = ".zip")
+td <- tempdir()
+url = "https://sos.alabama.gov/sites/default/files/election-data/2017-06/2016-General-PrecinctLevel.zip"
+download.file(url, destfile = tf)
+td.pres <- paste0(td, "\\", "president")
+dir.create(td.pres)
+unzip(tf, exdir = td.pres)
+al.pres.data <- list.files(td.pres)[grep(".xls", list.files(td.pres))]
+
+al.prec.pres <- list()
+al.county.pres <- list()
+for(i in seq_along(al.pres.data)){
+  
+  al.file <- paste0(td.pres,"\\", al.pres.data[i])
+  
+  x <- read_xls(al.file)  
+  
+  get.rows <- c(grep("Trump", x$Candidate),
+                grep("Hillary Rodham Clinton", x$Candidate),
+                grep("Ballots Cast - Total", x$Candidate)) 
+  rm.cols <- which(names(x) %in% c("Contest Title", "Party"))
+  
+  x <- x[get.rows, -rm.cols]
+  
+  x <- x %>%
+    
+    gather(key = precincts, value = votes, -Candidate) %>%
+    
+    spread(key = Candidate, value = votes)
+  
+  names(x)[grep("Trump", names(x))] <- "Trump"
+  names(x)[grep("Clinton", names(x))] <- "Clinton"
+  names(x)[grep("Total", names(x))] <- "Total"
+  names(x)[grep("precincts", names(x))] <- "Precinct"
+  
+  x <- x %>% 
+    mutate(trump_pct = Trump / Total,
+           clinton_pct = Clinton / Total) 
+  
+  x$Precinct <- str_remove(x$Precinct, "^[[:digit:]]{4} - ")
+  x$Precinct <- str_remove_all(x$Precinct, "[[:punct:]]")
+  
+  al.prec.pres[[i]] <- x %>% filter(!Precinct %in% c("ABSENTEE", "PROVISIONAL"))
+  
+  county <-  al.pres.data[i]
+  
+  x <- x %>% 
+    summarise(County = county,
+              Total = sum(Total),
+              Trump = sum(Trump),
+              Clinton = sum(Clinton)) %>%
+    mutate(trump_pct = Trump / Total,
+           clinton_pct = Clinton / Total)
+  
+  al.county.pres[[i]] <- x    
+  
+ }
+al.prec.pres <- data.table::rbindlist(al.prec.pres)
+al.county.pres <- data.table::rbindlist(al.county.pres)
+
+# load alabama special election results 2017 ====
+tf <- tempfile(pattern = "senate", tmpdir = tempdir(), fileext = ".zip")
+td <- tempdir()
+url = "https://sos.alabama.gov/sites/default/files/election-data/2018-03/2017-Special-General-PrecinctLevel.zip"
+download.file(url, destfile = tf)
+td.senate <- paste0(td, "\\", "senate")
+dir.create(td.senate)
+unzip(tf, exdir = td.senate)
+al.sen.data <- list.files(td.senate)[grep(".xls", list.files(td.senate))]
+
+al.prec.senate <- list()
+al.county.senate <- list()
+for(i in seq_along(al.sen.data)) {
+  
+  al.file <- paste0(td.senate, "\\", al.sen.data[i])
+  
+  x <- read_xls(al.file) 
+  
+  get.rows <- which(x$Candidate %in% c("Roy S. Moore", "Doug Jones", "Ballots Cast - Total"))
+  rm.cols <- which(names(x) %in% c("Contest Title", "Party"))
+  
+  x <- x[get.rows, -rm.cols] 
+  
+  x <- x %>%
+    
+    gather(key = precincts, value = votes, -Candidate) %>%
+    
+    spread(key = Candidate, value = votes)
+  
+  names(x)[grep("precincts", names(x))] <- "Precinct"
+  names(x)[grep("Jones", names(x))] <- "Jones"
+  names(x)[grep("Moore", names(x))] <- "Moore"
+  names(x)[grep("Total", names(x))] <- "Total"
+  
+  x <- x %>%
+    mutate(jones_pct = Jones / Total,
+           moore_pct = Moore / Total) 
+  
+  x$Precinct <- str_remove(x$Precinct, "^PREC [[:digit:]]{4} - ")
+  x$Precinct <- str_remove_all(x$Precinct, "[[:punct:]]")
+  
+  al.prec.senate[[i]] <- x %>% filter(!Precinct %in% c("ABSENTEE", "PROVISIONAL"))
+  
+  county <-  al.sen.data[i] 
+  
+  x <- x %>% 
+    summarise(County = county,
+              Total = sum(Total),
+              Moore = sum(Moore),
+              Jones = sum(Jones)) %>%
+    mutate(moore_pct = Moore / Total,
+           jones_pct = Jones / Total)
+  
+  al.county.senate[[i]] <- x    
+  
+  }
+al.prec.senate <- data.table::rbindlist(al.prec.senate)
+al.county.senate <- data.table::rbindlist(al.county.senate)
+
+
+# merge and plot counties ====
+
+# extract county names from file names
+al.county.senate$County <- str_remove(al.county.senate$County, "2017-General-")
+al.county.senate$County <- str_remove(al.county.senate$County, "\\.xls")
+
+al.county.pres$County <- str_remove(al.county.pres$County, "2016-General-")
+al.county.pres$County <- str_remove(al.county.pres$County, "\\.xls")
+
+ala.county <- merge(al.county.pres, al.county.senate, by = "County") %>% as.tibble() %>%
+  mutate(change_dem = jones_pct - clinton_pct)
+
+ala.county  %>%
+  ggplot() +
+  geom_point(aes(trump_pct, change_dem, size = Total.x), alpha=.5, col="darkblue") +
+  geom_smooth(aes(trump_pct, change_dem, weight = Total.x), col = "darkblue", alpha = .15) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  geom_hline(yintercept = 0, colour = "black")
+
+
+# merge and plot precincts ====
+
+  # note that not all precincts are merge: 
+  # there were 112 more precincts in the presidential race, plus some do not match
+   length(intersect(al.prec.pres$Precinct, al.prec.senate$Precinct)) # N = 1,523 precincts 
+   length(unique(al.prec.pres$Precinct)) - length(unique(al.prec.senate$Precinct))
+
+# merge 2016 Presidential results with 2017 Senate results; calculate change in % Democrat   
+ala.prec <- merge(al.prec.pres, al.prec.senate, by = "Precinct") %>% 
+  as.tibble() %>%
+  mutate(change_dem = jones_pct - clinton_pct) 
+
+alabama <- list(ala.county, ala.prec)
+
+saveRDS(alabama, "data/alabama/counties-and-precincts.rds")
+  
+ala.prec %>%
+  ggplot() +
+  geom_point(aes(trump_pct, change_dem, 
+                 colour = ala.prec$change_dem > 0,
+                 size = Total.x), 
+             alpha = .75,
+             shape = 1
+             ) +
+  geom_smooth(aes(trump_pct, change_dem, weight = Total.x), col = "darkblue") +
+  scale_color_manual(values = c("firebrick", "darkblue")) +
+  scale_x_continuous(breaks = seq(-.1, 1, .1),
+                     name = "Trump",
+                     labels = percent) +
+  scale_y_continuous(breaks = seq(-1, 1, .05),
+                     labels = percent,
+                     name = "Jones - Clinton",
+                     limits = c(-.15, .3)) +
+  theme_bw()  +
+  theme(legend.position = "none") +
+  geom_hline(yintercept = 0, colour = "black") 
+
+ggsave("alabama-dem-swing-plot.jpg", 
+       width = 5.5,
+       height = 4.25)
+
+  
+  

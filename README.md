@@ -1,2 +1,3 @@
-# Dallet2018
-Election results for Wisconsin Supreme Court, Apr. 3 2018
+# Watching the blue wave rise...
+
+Election results for Wisconsin Supreme Court, Apr. 3 2018, by county, and precinct-level results for the Alabama special election for Senate (2017). 
