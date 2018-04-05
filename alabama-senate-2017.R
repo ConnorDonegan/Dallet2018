@@ -130,7 +130,7 @@ al.prec.senate <- data.table::rbindlist(al.prec.senate)
 al.county.senate <- data.table::rbindlist(al.county.senate)
 
 
-# merge and  ====
+# merge county results  ====
 
 # extract county names from file names
 al.county.senate$County <- str_remove(al.county.senate$County, "2017-General-")
@@ -163,45 +163,60 @@ ggsave("alabama-county-dem-swing-plot.jpg",
 
 write_csv(ala.county, "data/alabama/county-results-20162017.csv")
 
-# merge and plot precincts ====
+# merge precinct results ====
 
-  # note that not all precincts are merge: 
-  # there were 112 more precincts in the presidential race, plus some do not match
+  # note that not all precincts match between elections: 
+  # there were 112 more precincts in the presidential race, irregular formating also causes non-matches
    length(intersect(al.prec.pres$Precinct, al.prec.senate$Precinct)) # N = 1,523 precincts 
    length(unique(al.prec.pres$Precinct)) - length(unique(al.prec.senate$Precinct))
 
-# merge 2016 Presidential results with 2017 Senate results; calculate change in % Democrat   
+ # merge precinct-level 2016 Presidential results with 2017 Senate results; calculate change in % Democrat   
 ala.prec <- merge(al.prec.pres, al.prec.senate, by = "Precinct") %>% 
   as.tibble() %>%
   mutate(change_dem = jones_pct - clinton_pct) 
 
 write_csv(ala.prec, "data/alabama/precinct-results-20162017.csv")
 
-  
-ala.prec %>%
-  ggplot() +
+# plot results ====
+
+
+p <- read_csv("data/alabama/precinct-results-20162017.csv") %>%
+  mutate(level = "precinct") %>%
+  rename(Place = Precinct)
+c <- read_csv("data/alabama/county-results-20162017.csv") %>%
+  mutate(level = "county") %>%
+  rename(Place = County)
+
+al <- rbind(c,p)
+
+color.vec <- ifelse(al$level == "precinct", "gray50", "darkblue")
+alpha.vec <- ifelse(al$level == "precinct", .2, 1)
+
+ggplot(al) +
   geom_point(aes(trump_pct, change_dem, 
-                 colour = ala.prec$change_dem > 0,
+                 colour = color.vec,
                  size = Total.x), 
-             alpha = .75,
-             shape = 1
-             ) +
-  geom_smooth(aes(trump_pct, change_dem, weight = Total.x), col = "darkblue") +
-  scale_color_manual(values = c("firebrick", "darkblue")) +
+             alpha = alpha.vec,
+             shape = 1) +
+  # geom_line(aes(x = trump_pct, y = prediction)) +
+  scale_color_manual(values = c("darkblue", "gray50")) +
   scale_x_continuous(breaks = seq(-.1, 1, .1),
                      name = "Trump",
                      labels = percent) +
   scale_y_continuous(breaks = seq(-1, 1, .05),
                      labels = percent,
                      name = "Jones - Clinton",
-                     limits = c(-.15, .3)) +
+                     limits = c(-.1, .3)
+                     ) +
   theme_bw()  +
   theme(legend.position = "none") +
-  geom_hline(yintercept = 0, colour = "black") 
+  geom_hline(yintercept = 0, colour = "black") + 
+  geom_smooth(data = subset(al[which(al$level == "precinct"),]),
+              aes(trump_pct, change_dem),
+              col = "darkblue",
+              se = F)
+ggsave("alabama-dem-swing-plot.jpg", al.plot, width = 6, height = 5)
 
-ggsave("alabama-precinct-dem-swing-plot.jpg", 
-       width = 5.5,
-       height = 4.25)
 
   
   

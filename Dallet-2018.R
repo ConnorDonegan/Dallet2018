@@ -95,7 +95,7 @@ dem_growth1 <- ggplot(wi) +
              shape = 21,
              alpha = .85) 
 dem_growth1 <- dem_growth1 +  
-  stat_smooth( # smooth using regression spline with cubic  polynomial 
+  stat_smooth( # smooth using regression spline with cubic regression spline
               aes(trump_pct, dem_change, weight = Total_2016),
               method="lm", se=TRUE, fill=NA,
               formula=y ~ splines::ns(x, 3),colour="darkblue") +
