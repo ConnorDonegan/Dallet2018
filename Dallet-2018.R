@@ -16,7 +16,8 @@ lapply(pkgs, function(x) {
 
 # 2012 election results ====
 url <- "http://elections.wi.gov/sites/default/files/County%20by%20County_11.6.12.xls"
-download.file(url, destfile = "data/wisconsin/president2012.xls", method = "auto",
+download.file(url, destfile = "data/wisconsin/president2012.xls",
+              method = "auto",
               mode = "wb")
 pres12 <- read_excel("data/wisconsin/president2012.xls",
                    sheet = 2, skip = 6)[, c(1,3,4,5)]
@@ -38,6 +39,7 @@ pres16 <- pres16 %>%
          County = stringr::str_to_title(County))
 
 # get WI Supreme Court 2018 election results ====
+
 url <- "https://elections.ap.org/wpr/election_results/2018-04-03/state/WI/race/G/raceid/50888"
 columns <- ".vote-percentage , .vote-count , .candidate"
 county.names <- ".results-header h2"
@@ -51,7 +53,7 @@ SC <- wi %>%
   as.tibble() %>%
   slice(-c(1,2))  # remove state totals
 
- # 
+
 county.names <- wi %>%
   html_nodes(county.names) %>%
   html_text() %>%
@@ -69,9 +71,8 @@ SC$County <- county.names$V1
 names(SC) <- c("Candidate", "Total_SC", "Percent", "County")
 SC$Percent <- as.numeric( str_remove(SC$Percent, " %") )
 
- # fix Lincoln now
+ # fix Lincoln 
 SC$County[grep("ZLincoln", SC$County)] <- "Lincoln"
-# SCSave <- SC
 
 SC <- SC %>%
   dplyr::select(Candidate, Percent, County) %>%
@@ -95,7 +96,7 @@ dem_growth1 <- ggplot(wi) +
              shape = 21,
              alpha = .85) 
 dem_growth1 <- dem_growth1 +  
-  stat_smooth( # smooth using regression spline with cubic regression spline
+  stat_smooth( # smooth using cubic natural spline as the basis function
               aes(trump_pct, dem_change, weight = Total_2016),
               method="lm", se=TRUE, fill=NA,
               formula=y ~ splines::ns(x, 3),colour="darkblue") +
@@ -119,7 +120,7 @@ dem_growth2 <- ggplot(wi) +
              alpha = .85) 
 
 dem_growth2 <- dem_growth2 + 
-  stat_smooth( # smooth using regression spline with cubic  polynomial 
+  stat_smooth( # smooth using cubic natural spline as the basis function
     aes(gop_change, dem_change, weight = Total_2016),
     method="lm", se=TRUE, fill=NA,
     formula=y ~ splines::ns(x, 3),colour="darkblue") +

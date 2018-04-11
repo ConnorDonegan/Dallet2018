@@ -10,6 +10,7 @@ pkgs <- c("readxl", "tidyverse", "data.table", "scales")
 lapply(pkgs, library, character.only = TRUE); rm(list=ls())
 
 # load alabama 2016 presidential election results ====
+
 tf <- tempfile(pattern = "president", tmpdir = tempdir(), fileext = ".zip")
 td <- tempdir()
 url = "https://sos.alabama.gov/sites/default/files/election-data/2017-06/2016-General-PrecinctLevel.zip"
@@ -17,8 +18,10 @@ download.file(url, destfile = tf)
 td.pres <- paste0(td, "\\", "president")
 dir.create(td.pres)
 unzip(tf, exdir = td.pres)
-al.pres.data <- list.files(td.pres)[grep(".xls", list.files(td.pres))]
 
+ # each county has its own excel file. 
+ # Calculate precinct-level Clint and Trump vote shares and aggregate for each county
+al.pres.data <- list.files(td.pres)[grep(".xls", list.files(td.pres))]
 al.prec.pres <- list()
 al.county.pres <- list()
 for(i in seq_along(al.pres.data)){
@@ -35,9 +38,7 @@ for(i in seq_along(al.pres.data)){
   x <- x[get.rows, -rm.cols]
   
   x <- x %>%
-    
     gather(key = precincts, value = votes, -Candidate) %>%
-    
     spread(key = Candidate, value = votes)
   
   names(x)[grep("Trump", names(x))] <- "Trump"
@@ -71,6 +72,7 @@ al.prec.pres <- data.table::rbindlist(al.prec.pres)
 al.county.pres <- data.table::rbindlist(al.county.pres)
 
 # load alabama special election results 2017 ====
+
 tf <- tempfile(pattern = "senate", tmpdir = tempdir(), fileext = ".zip")
 td <- tempdir()
 url = "https://sos.alabama.gov/sites/default/files/election-data/2018-03/2017-Special-General-PrecinctLevel.zip"
@@ -78,8 +80,10 @@ download.file(url, destfile = tf)
 td.senate <- paste0(td, "\\", "senate")
 dir.create(td.senate)
 unzip(tf, exdir = td.senate)
-al.sen.data <- list.files(td.senate)[grep(".xls", list.files(td.senate))]
 
+ # each county has its own excel file. 
+ # Calculate precinct-level Jones and Moore vote shares and aggregate for each county 
+al.sen.data <- list.files(td.senate)[grep(".xls", list.files(td.senate))]
 al.prec.senate <- list()
 al.county.senate <- list()
 for(i in seq_along(al.sen.data)) {
@@ -94,9 +98,7 @@ for(i in seq_along(al.sen.data)) {
   x <- x[get.rows, -rm.cols] 
   
   x <- x %>%
-    
     gather(key = precincts, value = votes, -Candidate) %>%
-    
     spread(key = Candidate, value = votes)
   
   names(x)[grep("precincts", names(x))] <- "Precinct"
@@ -139,28 +141,11 @@ al.county.senate$County <- str_remove(al.county.senate$County, "\\.xls")
 al.county.pres$County <- str_remove(al.county.pres$County, "2016-General-")
 al.county.pres$County <- str_remove(al.county.pres$County, "\\.xls")
 
-ala.county <- merge(al.county.pres, al.county.senate, by = "County") %>% as.tibble() %>%
+ala.county <- merge(al.county.pres, al.county.senate, by = "County") %>% 
+  as.tibble() %>%
   mutate(change_dem = jones_pct - clinton_pct)
 
-ala.county  %>%
-  ggplot() +
-  geom_point(aes(trump_pct, change_dem, size = Total.x), alpha=.5, col="darkblue") +
-  geom_smooth(aes(trump_pct, change_dem, weight = Total.x), col = "darkblue", alpha = .15) +
-  scale_color_manual(values = c("firebrick", "darkblue")) +
-  scale_x_continuous(breaks = seq(-.1, 1, .1),
-                     name = "Trump",
-                     labels = percent) +
-  scale_y_continuous(breaks = seq(-1, 1, .05),
-                     labels = percent,
-                     name = "Jones - Clinton") +
-  theme_bw()  +
-  theme(legend.position = "none") +
-  geom_hline(yintercept = 0, colour = "black") 
-
-ggsave("alabama-county-dem-swing-plot.jpg", 
-       width = 5.5,
-       height = 4.25)
-
+# save results in case any changes are made to the Sec. of State webpage
 write_csv(ala.county, "data/alabama/county-results-20162017.csv")
 
 # merge precinct results ====
@@ -175,10 +160,10 @@ ala.prec <- merge(al.prec.pres, al.prec.senate, by = "Precinct") %>%
   as.tibble() %>%
   mutate(change_dem = jones_pct - clinton_pct) 
 
+# save results in case any changes are made to the Sec. of State webpage
 write_csv(ala.prec, "data/alabama/precinct-results-20162017.csv")
 
 # plot results ====
-
 
 p <- read_csv("data/alabama/precinct-results-20162017.csv") %>%
   mutate(level = "precinct") %>%
@@ -189,24 +174,22 @@ c <- read_csv("data/alabama/county-results-20162017.csv") %>%
 
 al <- rbind(c,p)
 
-color.vec <- ifelse(al$level == "precinct", "gray50", "darkblue")
+color.vec <- ifelse(al$level == "precinct", "black", "darkblue")
 alpha.vec <- ifelse(al$level == "precinct", .2, 1)
 
-ggplot(al) +
+al.all <- ggplot(al) +
   geom_point(aes(trump_pct, change_dem, 
                  colour = color.vec,
                  size = Total.x), 
-             alpha = alpha.vec,
-             shape = 1) +
-  # geom_line(aes(x = trump_pct, y = prediction)) +
-  scale_color_manual(values = c("darkblue", "gray50")) +
+              alpha = alpha.vec,
+              shape = 1) +
+  scale_color_manual(values = c("gray30", "darkblue")) +
   scale_x_continuous(breaks = seq(-.1, 1, .1),
                      name = "Trump",
                      labels = percent) +
   scale_y_continuous(breaks = seq(-1, 1, .05),
                      labels = percent,
-                     name = "Jones - Clinton",
-                     limits = c(-.1, .3)
+                     name = "Jones - Clinton"
                      ) +
   theme_bw()  +
   theme(legend.position = "none") +
@@ -214,7 +197,13 @@ ggplot(al) +
   geom_smooth(data = subset(al[which(al$level == "precinct"),]),
               aes(trump_pct, change_dem),
               col = "darkblue",
-              se = F)
+              se = F) 
+# a few extreme outliers pull down the expected value when % Trump is less than 10%
+al.all
+
+# outliers removed and a more meaningful scale
+al.plot <- al.all + ylim(c(-.1, .3))
+
 ggsave("alabama-dem-swing-plot.jpg", al.plot, width = 6, height = 5)
 
 
