@@ -185,12 +185,8 @@ al.all <- ggplot(al) +
               shape = 1) +
   scale_color_manual(values = c("gray30", "darkblue")) +
   scale_x_continuous(breaks = seq(-.1, 1, .1),
-                     name = "Trump",
+                     name = "Trump 2016",
                      labels = percent) +
-  scale_y_continuous(breaks = seq(-1, 1, .05),
-                     labels = percent,
-                     name = "Jones - Clinton"
-                     ) +
   theme_bw()  +
   theme(legend.position = "none") +
   geom_hline(yintercept = 0, colour = "black") + 
@@ -202,7 +198,11 @@ al.all <- ggplot(al) +
 al.all
 
 # outliers removed and a more meaningful scale
-al.plot <- al.all + ylim(c(-.1, .3))
+al.plot <- al.all + 
+  scale_y_continuous(breaks = seq(-1, 1, .05),
+                     labels = percent,
+                     name = "Jones 2017 minus Clinton 2016",
+                     limits = c(-.1, .3)) 
 
 ggsave("alabama-dem-swing-plot.jpg", al.plot, width = 6, height = 5)
 

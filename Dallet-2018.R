@@ -89,6 +89,9 @@ wi <- merge(pres12,pres16, by = "County") %>%
 
 write_csv(wi, "data/wisconsin/wi-county-supreme-court-2018.csv")
 
+# plot ====
+wi <- read_csv("data/wisconsin/wi-county-supreme-court-2018.csv")
+
 dem_growth1 <- ggplot(wi) +
   geom_point(aes(trump_pct, dem_change, 
                  col = wi$dem_change > 0,
@@ -102,12 +105,12 @@ dem_growth1 <- dem_growth1 +
               formula=y ~ splines::ns(x, 3),colour="darkblue") +
   scale_color_manual(values = c("firebrick", "darkblue")) +
   scale_x_continuous(breaks = seq(-1, 1, .1),
-                     name = "Trump",
+                     name = "Trump 2016",
                      labels = percent) +
   scale_y_continuous(breaks = seq(-1, 1, .05),
                      labels = percent,
                      limits = c(-.15, .18),
-                     name = "Dallet - Clinton") +
+                     name = "Dallet 2018 minus Clinton 2016") +
   theme_bw()  +
   theme(legend.position = "none") +
   geom_hline(yintercept = 0, colour = "black")
@@ -126,7 +129,7 @@ dem_growth2 <- dem_growth2 +
     formula=y ~ splines::ns(x, 3),colour="darkblue") +
   scale_color_manual(values = c("firebrick", "darkblue")) +
   scale_x_continuous(breaks = seq(-1, 1, .05),
-                     name = "Trump - Romney",
+                     name = "Trump 2016 minus Romney 2012",
                      labels = percent) +
   scale_y_continuous(breaks = seq(-1, 1, .05),
                      labels = percent,
