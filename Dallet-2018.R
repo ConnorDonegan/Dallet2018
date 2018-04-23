@@ -87,10 +87,13 @@ wi <- merge(pres12,pres16, by = "County") %>%
   mutate(dem_change = .01*dallet_pct - clinton_pct) %>%
   as.tibble()
 
-write_csv(wi, "data/wisconsin/wi-county-supreme-court-2018.csv")
+write_csv(wi, "data/wisconsin/wi-supreme-court-counties-2018.csv")
+
+files <- paste0('data/wisconsin/president', c('2012.xls', '2016.xlsx'))
+file.remove(files)
 
 # plot ====
-wi <- read_csv("data/wisconsin/wi-county-supreme-court-2018.csv")
+wi <- read_csv("data/wisconsin/wi-supreme-court-counties-2018.csv")
 
 dem_growth1 <- ggplot(wi) +
   geom_point(aes(trump_pct, dem_change, 
@@ -99,17 +102,17 @@ dem_growth1 <- ggplot(wi) +
              shape = 21,
              alpha = .85) 
 dem_growth1 <- dem_growth1 +  
-  stat_smooth( # smooth using cubic natural spline as the basis function
-              aes(trump_pct, dem_change, weight = Total_2016),
-              method="lm", se=TRUE, fill=NA,
-              formula=y ~ splines::ns(x, 3),colour="darkblue") +
+  # stat_smooth( # smooth using cubic natural spline as the basis function
+  #             aes(trump_pct, dem_change, weight = Total_2016),
+  #             method="lm", se=TRUE, fill=NA,
+  #             formula=y ~ splines::ns(x, 3),colour="darkblue") +
   scale_color_manual(values = c("firebrick", "darkblue")) +
   scale_x_continuous(breaks = seq(-1, 1, .1),
                      name = "Trump 2016",
                      labels = percent) +
   scale_y_continuous(breaks = seq(-1, 1, .05),
                      labels = percent,
-                     limits = c(-.15, .18),
+                     # limits = c(-.15, .18),
                      name = "Dallet 2018 minus Clinton 2016") +
   theme_bw()  +
   theme(legend.position = "none") +
