@@ -3,9 +3,9 @@
 # Clean precinct-level data on the Arpil 2018 Wisconsin Supreme Court election.
 # The data provided by the State of Wisconsin is in a very unfriendly format. 
 # This script converts the precinct results into a tidy .csv file; I also merge
-# the new data into a simple features (sf) file provided by the WI Legislative
-# Technology Bureau that contains demographic data and previous election results
-# at the ward-level.
+# the new data into a simple features (sf) file provided by the WI Legislative 
+#Technology Services Bureau that contains demographic data and previous election 
+# results at the ward-level.
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # load packages ====
