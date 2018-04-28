@@ -9,20 +9,22 @@
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # load packages ====
-library(data.table); library(tidyverse); library(sf)
+pkgs <- c("data.table", "tidyverse", "esri2sf")
+lapply(pkgs, library, character.only = TRUE)
 
 # load data, select the right rows and columns ====
 
 sc <- read_csv('data/wisconsin/wi-supreme-court-2018-wards-raw.csv')
 sc$dallet_pct <- sc$Dallet / sc$total
   
-  # standardize the ward names: all lowercase, no spaces
+  # standardize the ward names: all lowercase, no spaces, but leave punctuation in.
 sc$ward <- str_to_lower(sc$ward)
 sc$ward <- gsub(pattern = "[[:blank:]]", replacement = "", sc$ward)
   
   # remove rows that report the state and county totals
 county.totals <- grep('total', sc$ward)
 state.total <- grep('Total', sc$county)
+
   # leave behind vote counts---they would have to be divided among the numerous combined precincts
 sc <- sc[-c(county.totals, state.total), c('county', 'ward', 'dallet_pct')]
 
@@ -113,7 +115,6 @@ sc[ , -3] <- map_df(sc[, -3], as.character)
     # View(sc[which(sc$ward == 'cityofmenashawards1-2,4,7'),])
 
   # they don't indicate where the sequence ends (as in '5a-6'); must reference 2017 wards
-# wi <- st_read("data/wisconsin/Wards2017_ED12toED16")
 # wi$STR_WARDS <- str_to_lower(wi$STR_WARDS)
 # y <- wi[which(str_detect(wi$STR_WARDS, '[a-z]')),]
 # View(y)
@@ -203,8 +204,11 @@ sc_tidy <- sc_tidy[,c('CNTY_NAME', 'NAME', 'STR_WARDS', 'CTV', 'dallet_pct')] %>
 
 # Prepare WI Legislative Tech Bureau's sf file to merge with sc_tidy ====
 
-  # ward-level wisconsin election and demographic data, spatial (sf)
-  # https://www.arcgis.com/home/item.html?id=4743010a3c704cb0b52982e7ab4982ff
+  # ward-level wisconsin election and demographic data
+  # you can download the GEOJSON file as a simple features file this way
+# hist.ward.data <- "https://services1.arcgis.com/FDsAtKBk8Hy4cAH0/arcgis/rest/services/Wards_2011_wED_2016_2012/FeatureServer/0"
+# wi <- esri2sf(hist.ward.data)
+  # but the repository includes a copy of the current version
 wi <- st_read("data/wisconsin/Wards2017_ED12toED16")
 
   # municipal IDs: CTV indicates town, city, or village
@@ -222,10 +226,28 @@ wi2 <- left_join(wi, sc_tidy)
 
 # save as .csv and sf ====
 
-st_write(wi2, "data/wisconsin/Wards2017_ed12toEDApril18/Wards2017_ED12toED18.shp")
-old.shape <- 'data/wisconsin/Wards2017_ED12toED16'
-file.remove(old.shape)
 write_csv(sc_tidy, 'data/wisconsin/wi-supreme_court-2018-wards-clean.csv')
+
+dir.create("data/wisconsin/sf_file")
+shp.path <- "data/wisconsin/sf_file/wi-wards-data.shp"
+st_write(wi2, shp.path)
+
+files2zip <- dir("data/wisconsin/sf_file", full.names = T)
+
+zip(zipfile = "data/wisconsin/shape_zip",
+    files = files2zip)
+unlink('data/wisconsin/sf_file', recursive=TRUE)
+
+# to open the zip file and start using the simple features file, run this:
+# unzip("data/wisconsin/shape_zip.zip", exdir = "wi-wards")
+# sp <- st_read("wi-wards/data/wisconsin/sf_file/wi-wards-data.shp")
+# plot(sp['dallet_pct'])
+
+
+
+
+
+
 
 
 
