@@ -8,10 +8,9 @@ The repo has been updated to include a dataset of precinct-level results for the
 
 `wi-supreme-court-2018-wards-clean.csv` has the following columns: `CNTY_NAME` (county name), `NAME` (ward name), `STR_WARDS` (ward number, may include letters and numbers), `CTV` (city, town, or village indicator), and `dallet_pct` (vote share of the winning candidate, Rebecca Dallet). The first four columns together define a unique ward. The script merges the data with the `sf` file from the WI [Legislative Technology Services Bureau](https://www.arcgis.com/home/item.html?id=4743010a3c704cb0b52982e7ab4982ff#overview) which contains ward-level results from a plethora of state elections. 
 
-For quick access to the WI precinct data run the following code in R:
+For quick access to the WI precinct data, make sure you have installed the `sf` package and then run the following code in R:
 
 ```r
-library(sf)
 url <- 'https://github.com/ConnorDonegan/Dallet2018/raw/master/data/wisconsin/shape_zip.zip'
 tmp <- tempfile()
 download.file(url, tmp)
