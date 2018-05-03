@@ -146,18 +146,10 @@ dem_growth2 <- dem_growth2 +
 g <- gridExtra::arrangeGrob(dem_growth1, dem_growth2, ncol = 2, 
     top = "Progressive swing and prior Trump support for all Wisconsin counties")
 
-ggsave("wisconsin-dem-swing-plot.jpg", g, width = 6.5, height = 4)
+ggsave("figures/wisconsin-dem-swing-plot.jpg", g, width = 6.5, height = 4)
   
 
 
-  
-theme(plot.title = element_text(size = 10),
-      axis.title = element_text(size = 9),
-      plot.caption = element_text(size = 8)) +
-  labs(title = "Democratic swing and prior support for Trump\nfor all Alabama counties (blue) and precincts (gray)",
-       caption = "The fit line shows the average Democratic swing for any given level of Trump support in 2016.\nA small number of precincts are beyond the scale of this plot.")
-
-  
   
 
 

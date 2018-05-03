@@ -213,7 +213,7 @@ al.plot <- al.all +
   labs(title = "Democratic swing and prior support for Trump\nfor all Alabama counties (blue) and precincts (gray)",
           caption = "The fit line shows the average Democratic swing for any given level of Trump support in 2016.\nA small number of precincts are beyond the scale of this plot.")
 
-ggsave("alabama-dem-swing-plot.jpg", al.plot, width = 6.25, height = 5.25)
+ggsave("figures/alabama-dem-swing-plot.jpg", al.plot, width = 6.25, height = 5.25)
 
 
   
