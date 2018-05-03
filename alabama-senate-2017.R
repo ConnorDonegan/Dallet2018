@@ -189,11 +189,15 @@ al.all <- ggplot(al) +
                      labels = percent) +
   theme_bw()  +
   theme(legend.position = "none") +
-  geom_hline(yintercept = 0, colour = "black") + 
-  geom_smooth(data = subset(al[which(al$level == "precinct"),]),
+  geom_hline(yintercept = 0, colour = "black") +
+  stat_smooth(data = subset(al[which(al$level == "precinct"),]), 
               aes(trump_pct, change_dem),
-              col = "darkblue",
-              se = F) 
+              method="lm", 
+              fullrange = TRUE,
+              se=TRUE, 
+              fill=NA,
+              formula=y ~ splines::bs(x, 3),colour="darkblue") 
+  
 # a few extreme outliers pull down the expected value when % Trump is less than 10%
 al.all
 
@@ -202,9 +206,14 @@ al.plot <- al.all +
   scale_y_continuous(breaks = seq(-1, 1, .05),
                      labels = percent,
                      name = "Jones 2017 minus Clinton 2016",
-                     limits = c(-.1, .3)) 
+                     limits = c(-.1, .3)) +
+  theme(plot.title = element_text(size = 10),
+        axis.title = element_text(size = 9),
+        plot.caption = element_text(size = 8)) +
+  labs(title = "Democratic swing and prior support for Trump\nfor all Alabama counties (blue) and precincts (gray)",
+          caption = "The fit line shows the average Democratic swing for any given level of Trump support in 2016.\nA small number of precincts are beyond the scale of this plot.")
 
-ggsave("alabama-dem-swing-plot.jpg", al.plot, width = 6, height = 5)
+ggsave("alabama-dem-swing-plot.jpg", al.plot, width = 6.25, height = 5.25)
 
 
   

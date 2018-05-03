@@ -102,7 +102,7 @@ dem_growth1 <- ggplot(wi) +
              shape = 21,
              alpha = .85) 
 dem_growth1 <- dem_growth1 +  
-  # stat_smooth( # smooth using cubic natural spline as the basis function
+  # stat_smooth( 
   #             aes(trump_pct, dem_change, weight = Total_2016),
   #             method="lm", se=TRUE, fill=NA,
   #             formula=y ~ splines::ns(x, 3),colour="darkblue") +
@@ -118,6 +118,7 @@ dem_growth1 <- dem_growth1 +
   theme(legend.position = "none") +
   geom_hline(yintercept = 0, colour = "black")
 
+  # by swing to Trump in 2016...
 dem_growth2 <- ggplot(wi) +
   geom_point(aes(gop_change, dem_change, 
                  col = wi$dem_change > 0,
@@ -142,14 +143,20 @@ dem_growth2 <- dem_growth2 +
   theme(legend.position = "none") +
   geom_hline(yintercept = 0, colour = "black")
 
-g <- gridExtra::arrangeGrob(dem_growth1, dem_growth2, ncol = 2)
+g <- gridExtra::arrangeGrob(dem_growth1, dem_growth2, ncol = 2, 
+    top = "Progressive swing and prior Trump support for all Wisconsin counties")
 
-ggsave("wisconsin-dem-swing-plot.jpg", g, width = 7, height = 4)
+ggsave("wisconsin-dem-swing-plot.jpg", g, width = 6.5, height = 4)
   
 
 
   
-  
+theme(plot.title = element_text(size = 10),
+      axis.title = element_text(size = 9),
+      plot.caption = element_text(size = 8)) +
+  labs(title = "Democratic swing and prior support for Trump\nfor all Alabama counties (blue) and precincts (gray)",
+       caption = "The fit line shows the average Democratic swing for any given level of Trump support in 2016.\nA small number of precincts are beyond the scale of this plot.")
+
   
   
 
