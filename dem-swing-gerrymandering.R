@@ -107,16 +107,20 @@ project <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0'
 wi <- as(widf, 'Spatial')
 wi <- spTransform(wi, CRS(project))
 
+unlink("wi-wards", recursive = TRUE)
+
 # get senate district stats ====
 
 url <- "https://mapservices.legis.wisconsin.gov/arcgis/rest/services/ArcGIS_Online/Senate_Districts_2011/FeatureServer/0"
 senate <- esri2sf::esri2sf(url)
 senate <- as(senate, 'Spatial')
-senate <- spTransform(senate, CRS(project))
-  # use readShapePoly to remove orgphaned hole problems
+  # saving and opening again removes orgphaned hole problems
 dir.create("senate-shapefile")
 writeOGR(senate, dsn = "senate-shapefile", layer = "senate", driver="ESRI Shapefile")
-senate <- maptools::readShapePoly("senate-shapefile/senate.shp")
+senate <- senate <- readOGR(dsn = "senate-shapefile", layer = "senate")
+senate <- spTransform(senate, CRS(project))
+
+# senate <- maptools::readShapePoly("senate-shapefile/senate.shp")
 
 sds <- as.character(senate$SEN_NUM)
 
@@ -218,6 +222,8 @@ write_csv(res, "data/wisconsin/senate-districts-election-profile.csv")
 
 # plot senate swing ====
 
+# res <- read_csv("data/wisconsin/senate-districts-election-profile.csv")
+
 res <- arrange(res, desc(Lean))
 res$SEN_NUM <- factor(res$SEN_NUM, ordered = T, res$SEN_NUM)
 
@@ -253,9 +259,9 @@ sen.plot <- res %>%
         axis.title = element_text(size = 10),
         legend.title = element_text(size = 10),
         legend.text = element_text(size = 10)) +
-  labs(x = "State Senate District",
-       caption = "Recent Democratic performance is a weighted average of the difference between Democratic and Republican\n vote shares in the Presidential, US Senate, and Gubernatorial elections of 2012, 2014, and 2016.",
-       title = "Swing from recent Democratic performance to the April Supreme Court race")
+  labs(x = "WI Senate District",
+       caption = "Prior Democratic performance is a weighted average of the difference between Democratic and Republican\n vote shares in the Presidential, US Senate, and Gubernatorial elections of 2012, 2014, and 2016.",
+       title = "Swing from prior Democratic performance to the April Supreme Court race")
 
 png("figures/wi-senate-swing.png", width =7, height = 6, units = "in", res = 350)
 sen.plot
@@ -290,12 +296,12 @@ ass <- esri2sf::esri2sf(url)
 sf::st_write(ass, "data/wi-assembly/ass-dists.shp")
 ass <- read_sf("data/wi-assembly/ass-dists.shp", quiet = T)
 ass <- as(ass, 'Spatial')
-ass <- spTransform(ass, CRS(project))
-
-# use readShapePoly to remove orgphaned hole problems
+  # write and read again to remove orgphaned hole problems
 dir.create("assembly-shapefile")
 writeOGR(ass, dsn = "assembly-shapefile", layer = "ass", driver="ESRI Shapefile")
-ass <- maptools::readShapePoly("assembly-shapefile/ass.shp")
+ass <- readOGR(dsn = "assembly-shapefile", layer = "ass")
+ass <- spTransform(ass, CRS(project))
+unlink("assembly-shapefile", recursive = TRUE)
 
   # get partisanship
 url = "https://en.wikipedia.org/wiki/Wisconsin_State_Assembly"
@@ -396,7 +402,7 @@ for(i in seq_along(ads)){
   res.ass[ which(res.ass$District_N == district), "Dallet.margin"] <- (dem.votes / total.votes) - (rep.votes / total.votes)
   
 }
-unlink("assembly-shapefile", recursive = TRUE)
+
 write_csv(res.ass, "data/wisconsin/assembly-districts-election-profile.csv")
 
 # plot assembly swing ====
@@ -407,7 +413,7 @@ res.ass$District_N <- factor(res.ass$District_N, ordered = T, res.ass$District_N
 ass.plot <- res.ass %>%
   gather(key = measure, value = margin, -c(District_N, party)) %>%
   filter(measure %in% c("Lean", "Dallet.margin")) %>%
-  ggplot() +
+ ggplot() +
   geom_segment(data = res.ass,
                aes(x = District_N, xend = District_N,
                    y = Lean, 
@@ -416,7 +422,7 @@ ass.plot <- res.ass %>%
                                  Dallet.margin+0.0125)),
                arrow = arrow(length = unit(0.25, "cm"),
                              ends="last", type = "closed")) +
-  geom_point(aes(District_N, margin, 
+  geom_point(aes(District_N, margin,
                  fill = ifelse(party == "Dem", "Democrat", "Republican")),
              size = 5, shape = 21) +
   
@@ -434,9 +440,9 @@ ass.plot <- res.ass %>%
         legend.title = element_text(size = 10),
         legend.text = element_text(size = 9)) +
   geom_hline(aes(yintercept=0), col = "gray55") +
-  labs(x = "Assembly District",
-       caption = "Recent Democratic performance is a weighted average of the difference between Democratic and Republican vote shares\nin the Presidential, US Senate, and Gubernatorial elections of 2012, 2014, and 2016.",
-       title = "Swing from recent Democratic performance to the April Supreme Court race")
+  labs(x = "WI Assembly District",
+       caption = "Prior Democratic performance is a weighted average of the difference between Democratic and Republican vote shares\nin the Presidential, US Senate, and Gubernatorial elections of 2012, 2014, and 2016.",
+       title = "Swing from prior Democratic performance to the April Supreme Court race")
 
 png("figures/wi-assembly-swing.png", width =8, height = 12, units = "in", res = 350)
 ass.plot
