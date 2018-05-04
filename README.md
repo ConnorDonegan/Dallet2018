@@ -28,3 +28,5 @@ unzip(tmp, exdir = "wi-wards")
 sp <- sf::st_read("wi-wards/data/wisconsin/sf_file/wi-wards-data.shp")
 unlink(tmp)
 ```
+
+`dem-swing-gerrymandering.R` contains the source code to the figures in the blog post [Even gerrymandering may not save Wisconsin Republicans.](https://connordonegan.github.io/portfolio/gerrymandering-may-not-save-wisconsin-republicans/). 
