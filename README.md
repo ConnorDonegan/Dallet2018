@@ -13,7 +13,7 @@ The repo also includes a dataset of precinct-level results for the Wisconsin Sup
 * `CNTY_NAME` county name,
 * `NAME` ward name, 
 * `STR_WARDS` ward number (may include letters and numbers),
-*`CTV` city, town, or village indicator, 
+* `CTV` city, town, or village indicator, 
 * `Dallet` votes for Rebecca Dallet. For wards that were combined for this election, the total vote count was distributed evenly among each of the combined wards. This often results in fractions of votes being assigned and the numbers may be far from accurate. **This column was included only for the purpose of obtaining aggregate results for state legislative districts. Such aggregate counts are correct but ward-level counts may not be.** 
 * `total` total vote count. **This data was handled the same was as `Dallet` and the same considerations and warnings apply.**
 * `dallet_pct` vote share of the winning candidate, Rebecca Dallet. The aggregate vote shares of combined wards were simply assigned to all component wards.
