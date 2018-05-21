@@ -15,6 +15,7 @@ lapply(pkgs, function(x) {
 })
 
 # 2012 election results ====
+
 url <- "http://elections.wi.gov/sites/default/files/County%20by%20County_11.6.12.xls"
 download.file(url, destfile = "data/wisconsin/president2012.xls",
               method = "auto",
@@ -28,6 +29,7 @@ pres12 <- pres12 %>%
          County = stringr::str_to_title(County))
 
 # 2016 election results ====
+
 pres.2016 <- "http://elections.wi.gov/sites/default/files/County%20by%20County%20Report%20President%20of%20the%20United%20States%20Recount.xlsx"
 download.file(pres.2016, destfile = "data/wisconsin/president2016.xlsx", method = "auto",
               mode = "wb")
@@ -38,7 +40,9 @@ pres16 <- pres16 %>%
          clinton_pct = Clinton / Total_2016,
          County = stringr::str_to_title(County))
 
-# get WI Supreme Court 2018 election results ====
+# get WI Supreme Court 2018 election results [URL no longer exists] ====
+
+  # the data is stored in data/wi-supreme-court-counties-2018.csv
 
 url <- "https://elections.ap.org/wpr/election_results/2018-04-03/state/WI/race/G/raceid/50888"
 columns <- ".vote-percentage , .vote-count , .candidate"
@@ -79,6 +83,7 @@ SC <- SC %>%
   spread(key = Candidate, value = Percent)
 names(SC) <- c("County", "dallet_pct", "screnock_pct")
 SC$County <- str_to_title(SC$County)
+
 # merge all three ====
 
 wi <- merge(pres12,pres16, by = "County") %>% 
@@ -93,6 +98,7 @@ files <- paste0('data/wisconsin/president', c('2012.xls', '2016.xlsx'))
 file.remove(files)
 
 # plot ====
+
 wi <- read_csv("data/wisconsin/wi-supreme-court-counties-2018.csv")
 
 dem_growth1 <- ggplot(wi) +
