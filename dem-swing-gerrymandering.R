@@ -30,7 +30,7 @@ wi <- sf::st_read("wi-wards/data/wisconsin/sf_file/wi-wards-data.shp", quiet =T)
 widf <- wi
 st_geometry(widf) <- NULL
 
-get.margins <- function(year, seats = seats <- c("GOV", "USH", "USS", "WSA", "WSS")){
+get.margins <- function(year, seats = c("GOV", "USH", "USS", "WSA", "WSS")){
   
   if(any(str_length(year)>2)) stop("Year must be two digits.")
   
