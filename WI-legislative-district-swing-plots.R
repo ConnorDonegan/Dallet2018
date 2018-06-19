@@ -16,15 +16,7 @@
 pkgs <- c("tidyverse", "data.table", "esri2sf", "sf", "rvest")
 lapply(pkgs, library, character.only = TRUE)
 
-# load precinct data, convert to spatial polygons dataframe ====
-
-# url <- 'https://github.com/ConnorDonegan/Dallet2018/raw/master/data/wisconsin/shape_zip.zip'
-# tmp <- tempfile()
-# download.file(url, tmp)
-# unzip(tmp, exdir = "wi-wards")
-# unlink(tmp)
-# wi <- sf::st_read("wi-wards/data/wisconsin/sf_file/wi-wards-data.shp", quiet =T)
-# unlink("wi-wards", recursive = TRUE)
+# load precinct data ====
 
 unzip("data/wisconsin/shape_zip.zip", exdir = "data/wisconsin/wi-wards")
 wi <- sf::st_read("data/wisconsin/wi-wards/data/wisconsin/sf_file/wi-wards-data.shp", quiet =T)
