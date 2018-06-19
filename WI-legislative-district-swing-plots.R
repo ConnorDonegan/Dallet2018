@@ -2,13 +2,13 @@
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Will gerrymandering insulate Wisconsin Republicans from a major Democratic swing this November?
-# Get partisan lean and returns from Dallet's race for every senate and assembly district
-# Plot swing from historic democratic performance to the April '18 Supreme Court race.
+
+# Get partisan lean and returns from Dallet's race for every senate and assembly district then
+# plot the swing from historic democratic performance to the April '18 Supreme Court race.
+
 # The precinct dataset is not perfect: 3.4% of 6,635 precincts are missing data on the
 # April Supreme Court race due to inability to join the datasets and also, perhaps, due
 # to changes in the precint map since 2016.
-# Also remember that the partisan lean calculated here will differ (be less extreme) than
-# would a measure based only on state legislative races; this is due to split ticket voting.
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # load packages ====
