@@ -1,6 +1,6 @@
 # Gathering and visualizing local election results in Wisconsin and Alabama
 
-Local election results for Wisconsin Supreme Court, Apr. 3 2018 and the Alabama special election for Senate (2017).
+Local election results for Wisconsin Supreme Court race, Apr. 3 2018 and Alabama's December 2017 special US Senate election.
 
 `WI-WISupremeCourt-Apr-3-2018-plot-county-swing.R` and `AL-USSenate-Dec-12-2017-plot-county-swing.R` are the source code for the figures in [Is Trump country abandoning the GOP?](https://connordonegan.github.io/portfolio/is-trump-country-abandoning-the-gop/) 
 
@@ -18,15 +18,5 @@ The repo also includes a dataset of precinct-level results for the Wisconsin Sup
 * `total` total vote count. **This data was handled the same way as `Dallet` and the same considerations and warnings apply.**
 * `dallet_pct` vote share of the winning candidate, Rebecca Dallet. The aggregate vote shares of combined wards were simply assigned to all component wards.
 
-The first four columns together define a unique ward. The script also merges the data with the `sf` file from the WI [Legislative Technology Services Bureau](https://www.arcgis.com/home/item.html?id=4743010a3c704cb0b52982e7ab4982ff#overview) which contains ward-level results from a plethora of state elections. 
+The first four columns together define a unique ward. The script also merges the data with the `sf` file from the WI [Legislative Technology Services Bureau](https://www.arcgis.com/home/item.html?id=4743010a3c704cb0b52982e7ab4982ff#overview) which contains ward-level results from a plethora of state elections. The resulting simple features datatset is saved in `data/wisconsin/wi-sf-precinct-data-2012-2018.rds`
 
-For quick access to the WI precinct data, make sure you have installed the `sf` package and then run the following code in R:
-
-```r
-url <- 'https://github.com/ConnorDonegan/Dallet2018/raw/master/data/wisconsin/shape_zip.zip'
-tmp <- tempfile()
-download.file(url, tmp)
-unzip(tmp, exdir = "wi-wards")
-sp <- sf::st_read("wi-wards/data/wisconsin/sf_file/wi-wards-data.shp")
-unlink(tmp)
-```
