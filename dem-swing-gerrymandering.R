@@ -3,7 +3,7 @@
 
 
 # Can gerrymandering protect Wisconsin Republicans?
-# Get partisan lean and return's from Dallet's race for every senate and assembly district
+# Get partisan lean and returns from Dallet's race for every senate and assembly district
 # Plot swing from historic democratic performance to the April '18 Supreme Court race.
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

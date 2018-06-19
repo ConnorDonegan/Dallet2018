@@ -2,7 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-.xls
-.xlsx
-senate-2017
-wi-precinct-data.R
+data/alabama/senate-2017
+june12-special-elections.R
