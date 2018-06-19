@@ -12,7 +12,7 @@
 pkgs <- c("data.table", "tidyverse", "esri2sf", "sf")
 lapply(pkgs, library, character.only = TRUE)
 
-# load data, select the right rows and columns ====
+# load and standardize raw data ====
 
 sc <- read_csv('data/wisconsin/wi-supreme-court-2018-wards-raw.csv')
 sc$dallet_pct <- sc$Dallet / sc$total
@@ -20,6 +20,9 @@ sc$dallet_pct <- sc$Dallet / sc$total
 # standardize the ward names: all lowercase, no spaces, but leave punctuation in.
 sc$ward <- str_to_lower(sc$ward)
 sc$ward <- gsub(pattern = "[[:blank:]]", replacement = "", sc$ward)
+
+# fix repeat ward number in Richland County
+sc$ward[which(sc$ward == "townofbuenavistaward1-3,2")] <- "townofbuenavistaward1-3"
 
 # remove rows that report the state and county totals
 county.totals <- grep('total', sc$ward)
@@ -242,40 +245,19 @@ wi[,joinby_idx] <- purrr::map_df(as.data.frame(wi)[,joinby_idx], standardize_nam
 
 # merge sc_tidy with wi ====
 
-wi2 <- left_join(wi, sc_tidy, by = c("CNTY_NAME", "MCD_NAME", "CTV", "STR_WARDS"))
+wi2 <- left_join(wi, distinct(sc_tidy), by = c("CNTY_NAME", "MCD_NAME", "CTV", "STR_WARDS"))
 
 if(nrow(wi2)!=nrow(wi)) print("Investigate the join, it wasn't perfect")
-
-# save as .csv ====
+if(sum(is.na(wi2$Dallet))>0){
+  x <- sum(is.na(wi2$Dallet))
+  y <- round(x/nrow(wi2), 3)
+  print(paste(x, "precincts are missing data on the April 3rd race.",
+              "That is", 100*y, "percent of Wisconsin precincts."))
+}
+# save Dallet data as .csv ====
 
 write_csv(sc_tidy, 'data/wisconsin/wi-supreme_court-2018-wards-clean.csv')
 
-# save as compressed simple features file ====
+# save the entire precinct sf dataset as .rds ====
 
-dir.create("data/wisconsin/sf_file")
-shp.path <- "data/wisconsin/sf_file/wi-wards-data.shp"
-st_write(wi2, shp.path)
-
-files2zip <- dir("data/wisconsin/sf_file", full.names = T)
-
-zip(zipfile = "data/wisconsin/shape_zip",
-    files = files2zip)
-unlink('data/wisconsin/sf_file', recursive=TRUE)
-
-# to open the zip file and start using the simple features file, run this:
-# unzip("data/wisconsin/shape_zip.zip", exdir = "wi-wards")
-# sp <- st_read("wi-wards/data/wisconsin/sf_file/wi-wards-data.shp")
-# plot(sp['dallet_pct'])
-
-
-
-
-
-
-
-
-
-
-
-
-
+saveRDS(wi2, "data/wisconsin/wi-sf-precinct-data-2012-2018.rds")

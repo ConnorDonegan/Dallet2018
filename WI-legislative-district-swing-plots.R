@@ -18,9 +18,7 @@ lapply(pkgs, library, character.only = TRUE)
 
 # load precinct data ====
 
-unzip("data/wisconsin/shape_zip.zip", exdir = "data/wisconsin/wi-wards")
-wi <- sf::st_read("data/wisconsin/wi-wards/data/wisconsin/sf_file/wi-wards-data.shp", quiet =T)
-unlink("data/wisconsin/wi-wards", recursive = TRUE)
+wi <- readRDS("data/wisconsin/wi-sf-precinct-data-2012-2018.rds")
 
 # summarise election results by district ====
 
