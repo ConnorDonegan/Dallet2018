@@ -137,25 +137,26 @@ asm_lean <- get_lean(asm_histories)
 
 # assembly partisanship ====
 
-url = "https://en.wikipedia.org/wiki/Wisconsin_State_Assembly"
-tbl.node = '//*[@id="mw-content-text"]/div/table[5]'
-
-wiki <- read_html(url)
-asm_held_by <- wiki %>%
-  html_nodes(xpath = tbl.node) %>%
-  html_table()
-asm_held_by <- asm_held_by[[1]]
-names(asm_held_by)[c(2,4)] <- c("District", "held_by")
-asm_held_by <- asm_held_by %>%
-  arrange(District) %>%
-  dplyr::select(District, held_by)
-
-asm_held_by$held_by[which(asm_held_by$held_by == "")] <- "Open"
-
-asm_held_by$Party <- dplyr::recode_factor(asm_held_by$held_by,
-                                          Rep = "Republican",
-                                          Dem = "Democrat")
-
+# url = "https://en.wikipedia.org/wiki/Wisconsin_State_Assembly"
+# tbl.node = '//*[@id="mw-content-text"]/div/table[5]'
+# 
+# wiki <- read_html(url)
+# asm_held_by <- wiki %>%
+#   html_nodes(xpath = tbl.node) %>%
+#   html_table()
+# asm_held_by <- asm_held_by[[1]]
+# names(asm_held_by)[c(2,4)] <- c("District", "held_by")
+# asm_held_by <- asm_held_by %>%
+#   arrange(District) %>%
+#   dplyr::select(District, held_by)
+# 
+# asm_held_by$held_by[which(asm_held_by$held_by == "")] <- "Open"
+# 
+# asm_held_by$Party <- dplyr::recode_factor(asm_held_by$held_by,
+#                                           Rep = "Republican",
+#                                           Dem = "Democrat")
+saveRDS(asm_held_by, "data/wisconsin/asm-held-by.rds")
+asm_held_by <- readRDS("data/wisconsin/asm-held-by.rds")
 
 # Senate partisanship (as of July 2018) ====
 
