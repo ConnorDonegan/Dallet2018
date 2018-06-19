@@ -13,19 +13,22 @@
 
 # load packages ====
  
-knitr::opts_chunk$set(echo = F, message = F, warning = F)
 pkgs <- c("tidyverse", "data.table", "esri2sf", "sf", "rvest")
 lapply(pkgs, library, character.only = TRUE)
 
 # load precinct data, convert to spatial polygons dataframe ====
 
-url <- 'https://github.com/ConnorDonegan/Dallet2018/raw/master/data/wisconsin/shape_zip.zip'
-tmp <- tempfile()
-download.file(url, tmp)
-unzip(tmp, exdir = "wi-wards")
-unlink(tmp)
-wi <- sf::st_read("wi-wards/data/wisconsin/sf_file/wi-wards-data.shp", quiet =T)
-unlink("wi-wards", recursive = TRUE)
+# url <- 'https://github.com/ConnorDonegan/Dallet2018/raw/master/data/wisconsin/shape_zip.zip'
+# tmp <- tempfile()
+# download.file(url, tmp)
+# unzip(tmp, exdir = "wi-wards")
+# unlink(tmp)
+# wi <- sf::st_read("wi-wards/data/wisconsin/sf_file/wi-wards-data.shp", quiet =T)
+# unlink("wi-wards", recursive = TRUE)
+
+unzip("data/wisconsin/shape_zip.zip", exdir = "data/wisconsin/wi-wards")
+wi <- sf::st_read("data/wisconsin/wi-wards/data/wisconsin/sf_file/wi-wards-data.shp", quiet =T)
+unlink("data/wisconsin/wi-wards", recursive = TRUE)
 
 # summarise election results by district ====
 
@@ -229,7 +232,7 @@ assembly_swing <- ggplot(gdata) +
        caption = "Prior Democratic performance is a weighted average of the difference between Democratic and Republican\n vote shares in the Presidential, US Senate, and Gubernatorial elections of 2012, 2014, and 2016.",
        title = "Swing from prior Democratic performance to April Supreme Court race")
 
-png("figures/wi-assembly-swing.png", width =8, height = 12, units = "in", res = 500)
+png("figures/wi-assembly-swing.png", width =8, height = 13, units = "in", res = 500)
 assembly_swing
 dev.off()
 
@@ -285,7 +288,7 @@ senate_swing <- ggplot(gdata) +
        caption = "Prior Democratic performance is a weighted average of the difference between Democratic and Republican\n vote shares in the Presidential, US Senate, and Gubernatorial elections of 2012, 2014, and 2016.",
        title = "Swing from prior Democratic performance to the April Supreme Court race")
 
-png("figures/wi-senate-swing.png", width =8, height = 12, units = "in", res = 500)
+png("figures/wi-senate-swing.png", width =7, height = 8, units = "in", res = 500)
 senate_swing
 dev.off()
 
