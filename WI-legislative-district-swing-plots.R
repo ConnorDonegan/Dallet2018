@@ -139,7 +139,6 @@ asm_lean <- get_lean(asm_histories)
 
 # url = "https://en.wikipedia.org/wiki/Wisconsin_State_Assembly"
 # tbl.node = '//*[@id="mw-content-text"]/div/table[5]'
-# 
 # wiki <- read_html(url)
 # asm_held_by <- wiki %>%
 #   html_nodes(xpath = tbl.node) %>%
@@ -155,7 +154,8 @@ asm_lean <- get_lean(asm_histories)
 # asm_held_by$Party <- dplyr::recode_factor(asm_held_by$held_by,
 #                                           Rep = "Republican",
 #                                           Dem = "Democrat")
-saveRDS(asm_held_by, "data/wisconsin/asm-held-by.rds")
+# saveRDS(asm_held_by, "data/wisconsin/asm-held-by.rds")
+
 asm_held_by <- readRDS("data/wisconsin/asm-held-by.rds")
 
 # Senate partisanship (as of July 2018) ====
@@ -179,11 +179,11 @@ gdata <- asm_histories %>%
   dplyr::select(District, Dem_Margin) %>%
   rename(Dallet_Margin = Dem_Margin) %>%
   merge(asm_lean, by = "District") %>%
+  merge(asm_held_by, by = "District") %>%
   arrange(desc(Lean))
 
 gdata$District <- factor(gdata$District, ordered = T, gdata$District)
 
-gdata <- merge(gdata, asm_held_by, by = "District")
 
 assembly_swing <- ggplot(gdata) +
   geom_hline(aes(yintercept=0), col = "gray55") +
@@ -235,6 +235,7 @@ gdata <- sen_histories %>%
   dplyr::select(District, Dem_Margin) %>%
   rename(Dallet_Margin = Dem_Margin) %>%
   merge(sen_lean, by = "District") %>%
+  merge(sen_held_by, by = "District") %>%
   arrange(desc(Lean))
 
 gdata$District <- factor(gdata$District, ordered = T, gdata$District)
