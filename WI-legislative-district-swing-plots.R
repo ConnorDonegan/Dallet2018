@@ -11,16 +11,16 @@
 # to changes in the precint map since 2016.
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# load packages ====
+## load packages ====
  
 pkgs <- c("tidyverse", "data.table", "esri2sf", "sf", "rvest")
 lapply(pkgs, library, character.only = TRUE)
 
-# load precinct data ====
+## load precinct data ====
 
 wi <- readRDS("data/wisconsin/wi-sf-precinct-data-2012-2018.rds")
 
-# summarise election results by district ====
+## summarise election results by district ====
 
 wi <- as.data.frame(wi)
 district_history <- function(DistrictData) {
@@ -136,7 +136,8 @@ sen_lean <- get_lean(sen_histories)
 asm_lean <- get_lean(asm_histories)
 
 # assembly partisanship ====
-
+  
+  ## the (time-sensitive) data was webscraped then stored as an RDS file.
 # url = "https://en.wikipedia.org/wiki/Wisconsin_State_Assembly"
 # tbl.node = '//*[@id="mw-content-text"]/div/table[5]'
 # wiki <- read_html(url)

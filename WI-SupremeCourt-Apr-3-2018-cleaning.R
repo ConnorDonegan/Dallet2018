@@ -1,12 +1,12 @@
  
 
-# Clean precinct-level data on the Arpil 2018 Wisconsin Supreme Court election.
+## Clean precinct-level data on the Arpil 2018 Wisconsin Supreme Court election.
 # The data provided by the State of Wisconsin is in a very unfriendly format. 
 # This script converts the precinct results into a tidy .csv file; I also merge
 # the new data into a simple features (sf) file provided by the WI Legislative 
-#Technology Services Bureau that contains demographic data and previous election 
+# Technology Services Bureau that contains demographic data and previous election 
 # results at the ward-level.
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+## +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # load packages ====
 pkgs <- c("data.table", "tidyverse", "esri2sf", "sf")
@@ -159,7 +159,6 @@ for(i in seq_along(alphas$wardx)) {
   
 }
 
-
 # View( sc[which(str_detect(sc$ward, '\\d+[[:lower:]]')),] )
 # View(sc[which(sc$ward == 'cityofmenashawards1-2,4,7'),])
 
@@ -258,6 +257,18 @@ if(sum(is.na(wi2$Dallet))>0){
 
 write_csv(sc_tidy, 'data/wisconsin/wi-supreme_court-2018-wards-clean.csv')
 
-# save the entire precinct sf dataset as .rds ====
+# save the entire precinct sf dataset ====
 
 saveRDS(wi2, "data/wisconsin/wi-sf-precinct-data-2012-2018.rds")
+
+write_csv(as.data.frame(wi2), "data/wisconsin/wi-precinct-data-2012-2018.csv")
+
+
+
+
+
+
+
+
+
+
