@@ -2,10 +2,6 @@
 
 Local election results for Wisconsin Supreme Court race, Apr. 3 2018 and Alabama's December 2017 special US Senate election.
 
-`WI-WISupremeCourt-Apr-3-2018-plot-county-swing.R` and `AL-USSenate-Dec-12-2017-plot-county-swing.R` are the source code for the figures in [Is Trump country abandoning the GOP?](https://connordonegan.github.io/portfolio/is-trump-country-abandoning-the-gop/) 
-
-`WI-legislative-district-swing-plots.R` contains the source code to the figures in the blog post [Even gerrymandering may not save Wisconsin Republicans.](https://connordonegan.github.io/portfolio/gerrymandering-may-not-save-wisconsin-republicans/). 
-
 The repo also includes a dataset of precinct-level results for the Wisconsin Supreme Court race. Raw precinct data provided by the State of Wisconsin on this race is in an extremely unfriendly format (see `wi-supreme-court-2018-wards-raw.csv`). Many wards were combined for this election, and thus results are reported by groups of wards (e.g. City of Adams in Adams County Wards 1-3a). We need a file that has a row for each ward. The file `WI-SupremeCourt-Apr-3-2018-cleaning.R` cleans the file and saves the results as a `.csv` file as well as simple features (`sf`) file. 
 
 `wi-supreme-court-2018-wards-clean.csv` has the following columns: 
